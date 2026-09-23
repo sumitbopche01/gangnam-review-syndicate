@@ -1,0 +1,276 @@
+{
+  "mode": "full_alias_required",
+  "published": [
+    {
+      "id": "r1",
+      "status": "published",
+      "reasons": [],
+      "source": {
+        "platform": "naver_cafe",
+        "url": "https://cafe.naver.com/plasticsurgery/1001",
+        "language": "ko",
+        "retrievedAt": "2026-09-01T00:00:00Z"
+      },
+      "originalText": "2024년 3월 바노바기성형외과에서 김태형 원장님께 코성형을 받았습니다. 비용은 450만원이었고 회복은 2주 정도 걸렸습니다. 결과는 만족합니다.",
+      "procedure": {
+        "id": "rhinoplasty",
+        "evidence": "코성형",
+        "status": "supported"
+      },
+      "clinic": {
+        "id": "clinic_banobagi",
+        "name": "Banobagi Plastic Surgery",
+        "status": "supported"
+      },
+      "surgeon": {
+        "id": "surgeon_kim_taehyung",
+        "name": "Kim Tae-hyung",
+        "via": "full_alias",
+        "status": "supported"
+      },
+      "priceKrw": 4500000,
+      "comparisonLine": "rhinoplasty at Banobagi Plastic Surgery with Kim Tae-hyung. Price 4500000 KRW."
+    },
+    {
+      "id": "r3",
+      "status": "published",
+      "reasons": [],
+      "source": {
+        "platform": "daum_cafe",
+        "url": "https://cafe.daum.net/beauty/2002",
+        "language": "ko",
+        "retrievedAt": "2026-09-03T00:00:00Z"
+      },
+      "originalText": "아이디병원에서 쌍꺼풀 수술을 김민준 원장님께 받았습니다. 붓기는 5일 정도였습니다.",
+      "procedure": {
+        "id": "double_eyelid",
+        "evidence": "쌍꺼풀",
+        "status": "supported"
+      },
+      "clinic": {
+        "id": "clinic_id",
+        "name": "ID Hospital",
+        "status": "supported"
+      },
+      "surgeon": {
+        "id": "surgeon_kim_minjun",
+        "name": "Kim Min-jun",
+        "via": "full_alias",
+        "status": "supported"
+      },
+      "priceKrw": null,
+      "comparisonLine": "double eyelid at ID Hospital with Kim Min-jun. Price not stated."
+    }
+  ],
+  "quarantined": [
+    {
+      "id": "r4",
+      "status": "quarantined",
+      "reasons": [
+        "surgeon_unverified"
+      ],
+      "source": {
+        "platform": "naver_cafe",
+        "url": "https://cafe.naver.com/plasticsurgery/1004",
+        "language": "ko",
+        "retrievedAt": "2026-09-04T00:00:00Z"
+      },
+      "originalText": "바노바기에서 코성형을 했습니다. 김 원장님이 집도했습니다. 가격은 500만원.",
+      "procedure": {
+        "id": "rhinoplasty",
+        "evidence": "코성형",
+        "status": "supported"
+      },
+      "clinic": {
+        "id": "clinic_banobagi",
+        "name": "Banobagi Plastic Surgery",
+        "status": "supported"
+      },
+      "surgeon": {
+        "id": null,
+        "status": "unresolved"
+      },
+      "priceKrw": 5000000,
+      "comparisonLine": "rhinoplasty at Banobagi Plastic Surgery with unverified surgeon. Price 5000000 KRW."
+    }
+  ],
+  "duplicates": [
+    {
+      "id": "r2",
+      "duplicateOf": "r1"
+    }
+  ],
+  "trace": [
+    {
+      "step": "ingest",
+      "trigger": "cli",
+      "tool": "fixture loader",
+      "output": [
+        "r1",
+        "r2",
+        "r3",
+        "r4"
+      ]
+    },
+    {
+      "step": "extract",
+      "trigger": "ingest.records",
+      "tool": "extract agent + lookup tools",
+      "output": [
+        {
+          "id": "r1",
+          "procedure": "rhinoplasty",
+          "clinics": [
+            "clinic_banobagi"
+          ],
+          "priceKrw": 4500000
+        },
+        {
+          "id": "r2",
+          "procedure": "rhinoplasty",
+          "clinics": [
+            "clinic_banobagi"
+          ],
+          "priceKrw": 4500000
+        },
+        {
+          "id": "r3",
+          "procedure": "double_eyelid",
+          "clinics": [
+            "clinic_id"
+          ],
+          "priceKrw": null
+        },
+        {
+          "id": "r4",
+          "procedure": "rhinoplasty",
+          "clinics": [
+            "clinic_banobagi"
+          ],
+          "priceKrw": 5000000
+        }
+      ]
+    },
+    {
+      "step": "resolve",
+      "trigger": "extract.claims",
+      "tool": "resolve agent",
+      "output": [
+        {
+          "id": "r1",
+          "clinic": "clinic_banobagi",
+          "surgeon": "Kim Tae-hyung",
+          "surgeonVia": "full_alias",
+          "surgeonStatus": "supported"
+        },
+        {
+          "id": "r2",
+          "clinic": "clinic_banobagi",
+          "surgeon": "Kim Tae-hyung",
+          "surgeonVia": "full_alias",
+          "surgeonStatus": "supported"
+        },
+        {
+          "id": "r3",
+          "clinic": "clinic_id",
+          "surgeon": "Kim Min-jun",
+          "surgeonVia": "full_alias",
+          "surgeonStatus": "supported"
+        },
+        {
+          "id": "r4",
+          "clinic": "clinic_banobagi",
+          "surgeon": null,
+          "surgeonVia": null,
+          "surgeonStatus": "unresolved"
+        }
+      ]
+    },
+    {
+      "step": "dedupe",
+      "trigger": "resolve.claims",
+      "tool": "normalized-text hash",
+      "output": [
+        {
+          "id": "r1",
+          "duplicateOf": null
+        },
+        {
+          "id": "r2",
+          "duplicateOf": "r1"
+        },
+        {
+          "id": "r3",
+          "duplicateOf": null
+        },
+        {
+          "id": "r4",
+          "duplicateOf": null
+        }
+      ]
+    },
+    {
+      "step": "generate",
+      "trigger": "dedupe.claims",
+      "tool": "comparison-line agent",
+      "output": [
+        {
+          "id": "r1",
+          "line": "rhinoplasty at Banobagi Plastic Surgery with Kim Tae-hyung. Price 4500000 KRW."
+        },
+        {
+          "id": "r2",
+          "line": null
+        },
+        {
+          "id": "r3",
+          "line": "double eyelid at ID Hospital with Kim Min-jun. Price not stated."
+        },
+        {
+          "id": "r4",
+          "line": "rhinoplasty at Banobagi Plastic Surgery with unverified surgeon. Price 5000000 KRW."
+        }
+      ]
+    },
+    {
+      "step": "validate",
+      "trigger": "generate.claims",
+      "tool": "validate agent",
+      "output": [
+        {
+          "id": "r1",
+          "status": "published",
+          "reasons": []
+        },
+        {
+          "id": "r2",
+          "status": "duplicate",
+          "reasons": [
+            "duplicate_of_r1"
+          ]
+        },
+        {
+          "id": "r3",
+          "status": "published",
+          "reasons": []
+        },
+        {
+          "id": "r4",
+          "status": "quarantined",
+          "reasons": [
+            "surgeon_unverified"
+          ]
+        }
+      ]
+    },
+    {
+      "step": "publish",
+      "trigger": "validate.accepted",
+      "tool": "index writer",
+      "output": [
+        "r1",
+        "r3"
+      ]
+    }
+  ]
+}

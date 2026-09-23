@@ -1,0 +1,11 @@
+{
+  "name": "gangnam-syndicate",
+  "private": true,
+  "type": "module",
+  "description": "Multi-step review syndication pipeline for the Gangnam Beauty Guide assessment.",
+  "scripts": {
+    "start": "node src/run.js",
+    "broken": "node src/run.js --broken",
+    "test": "node --test test/pipeline.test.js"
+  }
+}
