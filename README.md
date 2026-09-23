@@ -1,8 +1,12 @@
-# Gangnam review syndication slice
+# Gangnam clinic pipeline
 
-Fixture-backed pipeline for Gangnam Beauty Guide. It turns four synthetic Korean reviews into comparison records an English-speaking buyer can use. A record is published only when the procedure, clinic, and surgeon each resolve from the Korean text.
+Fixture-backed agent pipeline for Gangnam Beauty Guide.
 
-This is not a license check. `supported` means the review contains a full alias from the local table.
+```text
+fetch clinics → analyse → translate Korean to English → fetch doctors → validate → publish
+```
+
+English names are display fields. A doctor is attached only when their Korean name is on the clinic page and the clinic id already resolved. `supported` means an alias hit, not a license check.
 
 ## Run
 
@@ -12,29 +16,25 @@ node src/run.js
 node --test test/pipeline.test.js
 ```
 
-`--broken` is the first version. `src/run.js` is the fix.
-
 ## Steps
 
-1. **Ingest** loads the fixture reviews (stand-in for Naver, Daum, and clinic blogs).
-2. **Extract** calls procedure, clinic, and price tools. It does not choose a surgeon.
-3. **Resolve** binds a clinic only on one full alias, then asks the surgeon tool.
-4. **Dedupe** drops a second posting of the same normalised text for the same clinic. `r2` is a repost of `r1`.
-5. **Generate** writes one comparison line from resolved fields only.
-6. **Validate** checks the Korean evidence span, the procedure alias, the clinic, and the surgeon status.
-7. **Publish** writes `published`, `quarantined`, and `duplicates`.
+1. **Fetch clinics.** Directory connector returns three Korean clinic pages.
+2. **Analyse.** Matches the Korean clinic name to an alias table and reads procedure terms from the Korean body. `강남뷰티의원` matches nothing, so no doctor call is made.
+3. **Translate.** Writes the English clinic name and procedure labels from the analysis. It does not choose a doctor.
+4. **Fetch doctors.** Doctor connector runs only with a resolved clinic id. The associate step keeps a doctor whose Korean name appears in the source body.
+5. **Validate.** Procedure evidence must still be in the Korean body. A doctor whose Korean name is absent is not publishable.
+6. **Publish.** English clinic cards plus attached doctors.
 
 ## Where it broke
 
-Banobagi has two surgeons surnamed Kim. Review `r4` says only `김 원장님` ("Director Kim"). The first resolver treated the surname as an identity and took the first table row, Kim Tae-hyung. The validator only checked that the clinic name appeared in the comparison line, so the invented surgeon was published.
+Banobagi's page says `김 원장님`, not a full name. The translator rendered that as "Dr. Kim". The doctor step treated the English surname as a match and took the first Banobagi row, Kim Tae-hyung. The validator only checked that the English hint appeared in the English summary.
 
-The fix is in the resolver and the validator. Surgeon matches now require a full alias such as `김태형`. The validator quarantines `surgeon_unverified` instead of trusting the line. Re-run: `r1` and `r3` publish, `r2` is a duplicate, `r4` is quarantined.
+The translator no longer emits a doctor. Association requires the full Korean name, so ID Hospital keeps 김민준 and Banobagi publishes with `doctorStatus: unresolved`. The unknown clinic stays quarantined.
 
 ## Fixtures
 
-| id | What it is | Fixed result |
-| --- | --- | --- |
-| r1 | Rhinoplasty, Banobagi, Kim Tae-hyung, 4,500,000 KRW | published |
-| r2 | Same text as r1 on another URL | duplicate of r1 |
-| r3 | Double eyelid, ID Hospital, Kim Min-jun | published |
-| r4 | Rhinoplasty at Banobagi, surgeon written only as Director Kim | quarantined |
+| page | Fixed result |
+| --- | --- |
+| 바노바기성형외과, rhinoplasty, surgeon written only as Director Kim | published clinic, no doctor |
+| 아이디병원, double eyelid, 김민준 | published clinic + Kim Min-jun |
+| 강남뷰티의원 | quarantined, doctors not fetched |

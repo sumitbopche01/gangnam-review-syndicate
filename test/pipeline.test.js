@@ -1,37 +1,40 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { REVIEWS } from "../src/fixtures.js";
 import { runPipeline } from "../src/pipeline.js";
 
-test("broken surname match publishes the ambiguous Banobagi review as Kim Tae-hyung", () => {
-  const result = runPipeline(REVIEWS, { brokenSurgeonMatch: true });
-  const publishedIds = result.published.map((record) => record.id);
-  assert.ok(publishedIds.includes("r4"));
-  const r4 = result.published.find((record) => record.id === "r4");
-  assert.equal(r4.surgeon.name, "Kim Tae-hyung");
-  assert.equal(r4.surgeon.via, "surname");
+test("broken english surname match assigns Kim Tae-hyung to a page that never names him", () => {
+  const result = runPipeline({ brokenDoctorFromEnglish: true });
+  const banobagi = result.published.find((card) => card.id === "page-banobagi");
+  assert.ok(banobagi);
+  assert.equal(banobagi.doctors[0].nameEn, "Kim Tae-hyung");
+  assert.equal(banobagi.doctors[0].via, "english_surname");
+  assert.equal(banobagi.korean.body.includes("김태형"), false);
 });
 
-test("full-alias gate quarantines a surname-only surgeon and still publishes the evidenced reviews", () => {
-  const result = runPipeline(REVIEWS, { brokenSurgeonMatch: false });
-  const publishedIds = result.published.map((record) => record.id).sort();
-  assert.deepEqual(publishedIds, ["r1", "r3"]);
+test("fixed pipeline translates the clinic and attaches a doctor only from the Korean name", () => {
+  const result = runPipeline({ brokenDoctorFromEnglish: false });
+  const publishedIds = result.published.map((card) => card.id).sort();
+  assert.deepEqual(publishedIds, ["page-banobagi", "page-id"]);
 
-  const r4 = result.quarantined.find((record) => record.id === "r4");
-  assert.equal(r4.status, "quarantined");
-  assert.ok(r4.reasons.includes("surgeon_unverified"));
-  assert.equal(r4.surgeon.id, null);
+  const banobagi = result.published.find((card) => card.id === "page-banobagi");
+  assert.equal(banobagi.english.nameEn, "Banobagi Plastic Surgery");
+  assert.equal(banobagi.procedures[0].id, "rhinoplasty");
+  assert.equal(banobagi.procedures[0].evidence, "코성형");
+  assert.deepEqual(banobagi.doctors, []);
+  assert.equal(banobagi.doctorStatus, "unresolved");
 
-  assert.deepEqual(result.duplicates, [{ id: "r2", duplicateOf: "r1" }]);
+  const idHospital = result.published.find((card) => card.id === "page-id");
+  assert.equal(idHospital.english.nameEn, "ID Hospital");
+  assert.equal(idHospital.procedures[0].id, "double_eyelid");
+  assert.equal(idHospital.doctors[0].nameKo, "김민준");
+  assert.equal(idHospital.doctors[0].nameEn, "Kim Min-jun");
+  assert.equal(idHospital.doctors[0].via, "korean_name");
 });
 
-test("published records keep a Korean evidence span and a price in KRW", () => {
-  const result = runPipeline(REVIEWS, { brokenSurgeonMatch: false });
-  const r1 = result.published.find((record) => record.id === "r1");
-  assert.equal(r1.procedure.id, "rhinoplasty");
-  assert.equal(r1.procedure.evidence, "코성형");
-  assert.equal(r1.clinic.id, "clinic_banobagi");
-  assert.equal(r1.surgeon.id, "surgeon_kim_taehyung");
-  assert.equal(r1.priceKrw, 4500000);
-  assert.ok(r1.originalText.includes(r1.procedure.evidence));
+test("an unknown clinic is quarantined and does not fetch doctors", () => {
+  const result = runPipeline({ brokenDoctorFromEnglish: false });
+  const unknown = result.quarantined.find((card) => card.id === "page-unknown");
+  assert.ok(unknown.reasons.includes("clinic_unresolved"));
+  assert.equal(unknown.doctorStatus, "skipped_unresolved_clinic");
+  assert.deepEqual(unknown.doctors, []);
 });

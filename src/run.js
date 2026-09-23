@@ -1,25 +1,33 @@
 import { mkdirSync, writeFileSync } from "node:fs";
-import { REVIEWS } from "./fixtures.js";
 import { runPipeline } from "./pipeline.js";
 
-const brokenSurgeonMatch = process.argv.includes("--broken");
-const result = runPipeline(REVIEWS, { brokenSurgeonMatch });
+const brokenDoctorFromEnglish = process.argv.includes("--broken");
+const result = runPipeline({ brokenDoctorFromEnglish });
 const output = {
-  mode: brokenSurgeonMatch ? "broken_surname_match" : "full_alias_required",
+  mode: brokenDoctorFromEnglish ? "doctor_matched_from_english" : "doctor_matched_from_korean",
   published: result.published,
   quarantined: result.quarantined,
-  duplicates: result.duplicates,
   trace: result.trace,
 };
 
 mkdirSync("output", { recursive: true });
-const file = brokenSurgeonMatch ? "output/broken.json" : "output/fixed.json";
+const file = brokenDoctorFromEnglish ? "output/broken.json" : "output/fixed.json";
 writeFileSync(file, JSON.stringify(output, null, 2));
 
 console.log(JSON.stringify({
   mode: output.mode,
-  published: result.published.map((record) => ({ id: record.id, surgeon: record.surgeon, line: record.comparisonLine })),
-  quarantined: result.quarantined.map((record) => ({ id: record.id, reasons: record.reasons, surgeon: record.surgeon })),
-  duplicates: result.duplicates,
+  published: result.published.map((card) => ({
+    id: card.id,
+    clinic: card.clinic,
+    procedures: card.procedures,
+    doctors: card.doctors,
+    summaryEn: card.english.summaryEn,
+  })),
+  quarantined: result.quarantined.map((card) => ({
+    id: card.id,
+    reasons: card.reasons,
+    doctors: card.doctors,
+    doctorStatus: card.doctorStatus,
+  })),
   wrote: file,
 }, null, 2));
