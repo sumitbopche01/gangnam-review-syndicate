@@ -4,8 +4,17 @@
   "type": "module",
   "description": "OpenAI agent pipeline that fetches Korean clinics, translates them, and attaches a doctor only when the Korean quote matches.",
   "scripts": {
-    "start": "node src/run.js",
-    "broken": "node src/run.js --broken",
-    "test": "node --test test/pipeline.test.js"
+    "start": "node --env-file=.env --import tsx src/run.ts",
+    "broken": "node --env-file=.env --import tsx src/run.ts --broken",
+    "test": "node --import tsx --test test/pipeline.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
   }
 }

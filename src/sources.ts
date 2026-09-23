@@ -1,10 +1,11 @@
 /**
  * Fixture connectors shaped like directory calls.
- * fetchClinics is the Korean source. fetchDoctors is keyed by clinic id
- * and is not allowed to search English prose.
+ * fetchDoctors is keyed by clinic id and never searches English prose.
  */
 
-export function fetchClinics() {
+import type { ClinicPage, Doctor } from "./types.ts";
+
+export function fetchClinics(): ClinicPage[] {
   return [
     {
       id: "page-banobagi",
@@ -33,7 +34,7 @@ export function fetchClinics() {
   ];
 }
 
-const DOCTORS_BY_CLINIC = {
+const DOCTORS_BY_CLINIC: Record<string, Doctor[]> = {
   clinic_banobagi: [
     { id: "surgeon_kim_taehyung", nameKo: "김태형", nameEn: "Kim Tae-hyung", surnameEn: "Kim" },
     { id: "surgeon_kim_seoyeon", nameKo: "김서연", nameEn: "Kim Seo-yeon", surnameEn: "Kim" },
@@ -43,6 +44,6 @@ const DOCTORS_BY_CLINIC = {
   ],
 };
 
-export function fetchDoctors(clinicId) {
+export function fetchDoctors(clinicId: string): Doctor[] {
   return DOCTORS_BY_CLINIC[clinicId] ?? [];
 }

@@ -1,6 +1,6 @@
 {
   "mode": "llm_surname_prompt",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "published": [
     {
       "id": "page-banobagi",
@@ -14,9 +14,9 @@
       },
       "english": {
         "nameEn": "Banobagi Plastic Surgery",
-        "summaryEn": "Gangnam rhinoplasty consultation. Dr. Kim leads the clinic.",
+        "summaryEn": "Consultation for rhinoplasty in Gangnam. Dr. Kim leads the clinic.",
         "translationRewritten": false,
-        "modelSummaryEn": "Gangnam rhinoplasty consultation. Dr. Kim leads the clinic."
+        "modelSummaryEn": "Consultation for rhinoplasty in Gangnam. Dr. Kim leads the clinic."
       },
       "clinic": {
         "id": "clinic_banobagi",
@@ -35,6 +35,7 @@
           "id": "surgeon_kim_taehyung",
           "nameKo": "김태형",
           "nameEn": "Kim Tae-hyung",
+          "surnameEn": "Kim",
           "via": "llm_surname",
           "quote": "김 원장님이 진료합니다."
         }
@@ -54,9 +55,9 @@
       },
       "english": {
         "nameEn": "ID Hospital",
-        "summaryEn": "Dr. Kim leads the clinic.",
+        "summaryEn": "Dr. Kim leads the clinic and performs double eyelid surgery.",
         "translationRewritten": false,
-        "modelSummaryEn": "Dr. Kim leads the clinic."
+        "modelSummaryEn": "Dr. Kim leads the clinic and performs double eyelid surgery."
       },
       "clinic": {
         "id": "clinic_id",
@@ -75,6 +76,7 @@
           "id": "surgeon_kim_minjun",
           "nameKo": "김민준",
           "nameEn": "Kim Min-jun",
+          "surnameEn": "Kim",
           "via": "llm_surname",
           "quote": "쌍꺼풀 수술을 김민준 원장이 집도합니다."
         }
@@ -101,7 +103,7 @@
         "nameEn": null,
         "summaryEn": null,
         "translationRewritten": false,
-        "modelSummaryEn": "We provide lifting and skin care services."
+        "modelSummaryEn": "The clinic offers lifting and skin care services."
       },
       "clinic": {
         "id": null,
@@ -127,14 +129,12 @@
     {
       "step": "analyse",
       "trigger": "page-banobagi",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "procedures": [
           "rhinoplasty"
         ],
-        "dropped": [
-          "코성형 상담"
-        ],
+        "dropped": [],
         "doctorMentions": [
           "김 원장님"
         ]
@@ -143,9 +143,9 @@
     {
       "step": "translate",
       "trigger": "page-banobagi",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
-        "summaryEn": "Gangnam rhinoplasty consultation. Dr. Kim leads the clinic."
+        "summaryEn": "Consultation for rhinoplasty in Gangnam. Dr. Kim leads the clinic."
       }
     },
     {
@@ -160,7 +160,7 @@
     {
       "step": "associate_doctor",
       "trigger": "page-banobagi",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "model": {
           "doctor_id": "surgeon_kim_taehyung",
@@ -177,7 +177,7 @@
     {
       "step": "analyse",
       "trigger": "page-id",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "procedures": [
           "double_eyelid"
@@ -193,9 +193,9 @@
     {
       "step": "translate",
       "trigger": "page-id",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
-        "summaryEn": "Dr. Kim leads the clinic."
+        "summaryEn": "Dr. Kim leads the clinic and performs double eyelid surgery."
       }
     },
     {
@@ -209,7 +209,7 @@
     {
       "step": "associate_doctor",
       "trigger": "page-id",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "model": {
           "doctor_id": "surgeon_kim_minjun",
@@ -226,7 +226,7 @@
     {
       "step": "analyse",
       "trigger": "page-unknown",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "procedures": [],
         "dropped": [
@@ -239,9 +239,9 @@
     {
       "step": "translate",
       "trigger": "page-unknown",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
-        "summaryEn": "We provide lifting and skin care services."
+        "summaryEn": "The clinic offers lifting and skin care services."
       }
     },
     {

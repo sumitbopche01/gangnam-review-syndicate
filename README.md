@@ -22,13 +22,15 @@ flowchart TD
 ## Run
 
 ```bash
-export OPENAI_API_KEY=...
-node src/run.js --broken
-node src/run.js
-node --test test/pipeline.test.js
+npm install
+cp .env.example .env   # then set OPENAI_API_KEY
+npm run broken
+npm start
+npm test
+npm run typecheck
 ```
 
-The default model is `gpt-4o-mini`. Override it with `OPENAI_MODEL`. Tests inject a scripted model so the quote gate can be checked without a network call. `src/run.js` calls OpenAI.
+The default model is `gpt-4o-mini`. Override it with `OPENAI_MODEL` in `.env`. Every model response is parsed with zod before the pipeline reads it. Tests inject a scripted model so the quote gate runs without a network call. `npm start` calls OpenAI.
 
 ## Steps
 

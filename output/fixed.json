@@ -1,6 +1,6 @@
 {
   "mode": "llm_full_name_plus_quote_gate",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "published": [
     {
       "id": "page-banobagi",
@@ -46,9 +46,9 @@
       },
       "english": {
         "nameEn": "ID Hospital",
-        "summaryEn": "ID Hospital offers double eyelid surgery.",
+        "summaryEn": "Double eyelid surgery is performed.",
         "translationRewritten": false,
-        "modelSummaryEn": "ID Hospital offers double eyelid surgery."
+        "modelSummaryEn": "Double eyelid surgery is performed."
       },
       "clinic": {
         "id": "clinic_id",
@@ -67,8 +67,9 @@
           "id": "surgeon_kim_minjun",
           "nameKo": "김민준",
           "nameEn": "Kim Min-jun",
+          "surnameEn": "Kim",
           "via": "llm_korean_quote",
-          "quote": "김민준 원장이"
+          "quote": "김민준 원장이 집도합니다"
         }
       ],
       "doctorStatus": "supported",
@@ -93,7 +94,7 @@
         "nameEn": null,
         "summaryEn": null,
         "translationRewritten": false,
-        "modelSummaryEn": "We provide lifting and skin care services."
+        "modelSummaryEn": "We offer lifting and skin care services."
       },
       "clinic": {
         "id": null,
@@ -119,7 +120,7 @@
     {
       "step": "analyse",
       "trigger": "page-banobagi",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "procedures": [
           "rhinoplasty"
@@ -133,7 +134,7 @@
     {
       "step": "translate",
       "trigger": "page-banobagi",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "summaryEn": "Consultation for rhinoplasty at Banobagi Plastic Surgery."
       }
@@ -150,11 +151,11 @@
     {
       "step": "associate_doctor",
       "trigger": "page-banobagi",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "model": {
           "doctor_id": null,
-          "quote": null,
+          "quote": "김 원장님이 진료합니다.",
           "status": "unresolved"
         },
         "kept": [],
@@ -165,7 +166,7 @@
     {
       "step": "analyse",
       "trigger": "page-id",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "procedures": [
           "double_eyelid"
@@ -181,9 +182,9 @@
     {
       "step": "translate",
       "trigger": "page-id",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
-        "summaryEn": "ID Hospital offers double eyelid surgery."
+        "summaryEn": "Double eyelid surgery is performed."
       }
     },
     {
@@ -197,11 +198,11 @@
     {
       "step": "associate_doctor",
       "trigger": "page-id",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "model": {
           "doctor_id": "surgeon_kim_minjun",
-          "quote": "김민준 원장이",
+          "quote": "김민준 원장이 집도합니다",
           "status": "supported"
         },
         "kept": [
@@ -214,7 +215,7 @@
     {
       "step": "analyse",
       "trigger": "page-unknown",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
         "procedures": [],
         "dropped": [
@@ -227,9 +228,9 @@
     {
       "step": "translate",
       "trigger": "page-unknown",
-      "tool": "openai:gpt-4o-mini",
+      "tool": "openai:gpt-4o",
       "output": {
-        "summaryEn": "We provide lifting and skin care services."
+        "summaryEn": "We offer lifting and skin care services."
       }
     },
     {

@@ -3,12 +3,14 @@
  * It does not mean the clinic or doctor was license-checked.
  */
 
-export const PROCEDURES = [
+import type { Clinic, Procedure, ProcedureHit } from "./types.ts";
+
+export const PROCEDURES: Procedure[] = [
   { id: "rhinoplasty", labelEn: "rhinoplasty", aliases: ["코성형"] },
   { id: "double_eyelid", labelEn: "double eyelid", aliases: ["쌍꺼풀"] },
 ];
 
-export const CLINICS = [
+export const CLINICS: Clinic[] = [
   {
     id: "clinic_banobagi",
     nameEn: "Banobagi Plastic Surgery",
@@ -21,8 +23,8 @@ export const CLINICS = [
   },
 ];
 
-export function matchClinic(rawName) {
-  let best = null;
+export function matchClinic(rawName: string): { clinic: Clinic; alias: string } | null {
+  let best: { clinic: Clinic; alias: string } | null = null;
   for (const clinic of CLINICS) {
     for (const alias of clinic.aliases) {
       if (!rawName.includes(alias)) continue;
@@ -32,8 +34,8 @@ export function matchClinic(rawName) {
   return best;
 }
 
-export function matchProcedures(rawBody) {
-  const hits = [];
+export function matchProcedures(rawBody: string): ProcedureHit[] {
+  const hits: ProcedureHit[] = [];
   for (const procedure of PROCEDURES) {
     const alias = procedure.aliases.find((item) => rawBody.includes(item));
     if (!alias) continue;
