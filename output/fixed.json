@@ -1,5 +1,6 @@
 {
-  "mode": "doctor_matched_from_korean",
+  "mode": "llm_full_name_plus_quote_gate",
+  "model": "gpt-4o-mini",
   "published": [
     {
       "id": "page-banobagi",
@@ -13,12 +14,9 @@
       },
       "english": {
         "nameEn": "Banobagi Plastic Surgery",
-        "addressKo": "서울 강남구 논현로 517",
-        "proceduresEn": [
-          "rhinoplasty"
-        ],
-        "summaryEn": "rhinoplasty at Banobagi Plastic Surgery.",
-        "doctorHint": null
+        "summaryEn": "Consultation for rhinoplasty at Banobagi Plastic Surgery.",
+        "translationRewritten": false,
+        "modelSummaryEn": "Consultation for rhinoplasty at Banobagi Plastic Surgery."
       },
       "clinic": {
         "id": "clinic_banobagi",
@@ -33,7 +31,8 @@
         }
       ],
       "doctors": [],
-      "doctorStatus": "unresolved"
+      "doctorStatus": "unresolved",
+      "rejectReason": null
     },
     {
       "id": "page-id",
@@ -47,12 +46,9 @@
       },
       "english": {
         "nameEn": "ID Hospital",
-        "addressKo": "서울 강남구 도산대로 142",
-        "proceduresEn": [
-          "double eyelid"
-        ],
-        "summaryEn": "double eyelid at ID Hospital.",
-        "doctorHint": null
+        "summaryEn": "ID Hospital offers double eyelid surgery.",
+        "translationRewritten": false,
+        "modelSummaryEn": "ID Hospital offers double eyelid surgery."
       },
       "clinic": {
         "id": "clinic_id",
@@ -71,11 +67,12 @@
           "id": "surgeon_kim_minjun",
           "nameKo": "김민준",
           "nameEn": "Kim Min-jun",
-          "via": "korean_name",
-          "status": "supported"
+          "via": "llm_korean_quote",
+          "quote": "김민준 원장이"
         }
       ],
-      "doctorStatus": "supported"
+      "doctorStatus": "supported",
+      "rejectReason": null
     }
   ],
   "quarantined": [
@@ -94,10 +91,9 @@
       },
       "english": {
         "nameEn": null,
-        "addressKo": "서울 강남구 신사동 1",
-        "proceduresEn": [],
         "summaryEn": null,
-        "doctorHint": null
+        "translationRewritten": false,
+        "modelSummaryEn": "We provide lifting and skin care services."
       },
       "clinic": {
         "id": null,
@@ -105,7 +101,8 @@
       },
       "procedures": [],
       "doctors": [],
-      "doctorStatus": "skipped_unresolved_clinic"
+      "doctorStatus": "skipped_unresolved_clinic",
+      "rejectReason": null
     }
   ],
   "trace": [
@@ -121,111 +118,127 @@
     },
     {
       "step": "analyse",
-      "trigger": "fetch_clinics.pages",
-      "tool": "analyse agent",
-      "output": [
-        {
-          "id": "page-banobagi",
-          "clinicId": "clinic_banobagi",
-          "procedures": [
-            "rhinoplasty"
-          ]
-        },
-        {
-          "id": "page-id",
-          "clinicId": "clinic_id",
-          "procedures": [
-            "double_eyelid"
-          ]
-        },
-        {
-          "id": "page-unknown",
-          "clinicId": null,
-          "procedures": []
-        }
-      ]
+      "trigger": "page-banobagi",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "procedures": [
+          "rhinoplasty"
+        ],
+        "dropped": [],
+        "doctorMentions": [
+          "김 원장님"
+        ]
+      }
     },
     {
       "step": "translate",
-      "trigger": "analyse.clinics",
-      "tool": "translate agent",
-      "output": [
-        {
-          "id": "page-banobagi",
-          "nameEn": "Banobagi Plastic Surgery",
-          "summaryEn": "rhinoplasty at Banobagi Plastic Surgery.",
-          "doctorHint": null
-        },
-        {
-          "id": "page-id",
-          "nameEn": "ID Hospital",
-          "summaryEn": "double eyelid at ID Hospital.",
-          "doctorHint": null
-        },
-        {
-          "id": "page-unknown",
-          "nameEn": null,
-          "summaryEn": null,
-          "doctorHint": null
-        }
-      ]
+      "trigger": "page-banobagi",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "summaryEn": "Consultation for rhinoplasty at Banobagi Plastic Surgery."
+      }
     },
     {
       "step": "fetch_doctors",
-      "trigger": "translate.clinics",
-      "tool": "doctor directory connector + associate agent",
+      "trigger": "page-banobagi",
+      "tool": "doctor directory connector",
       "output": [
-        {
-          "id": "page-banobagi",
-          "fetched": [
-            "surgeon_kim_taehyung",
-            "surgeon_kim_seoyeon"
-          ],
-          "associated": [],
-          "doctorStatus": "unresolved"
-        },
-        {
-          "id": "page-id",
-          "fetched": [
-            "surgeon_kim_minjun"
-          ],
-          "associated": [
-            "Kim Min-jun"
-          ],
-          "doctorStatus": "supported"
-        },
-        {
-          "id": "page-unknown",
-          "fetched": [],
-          "associated": [],
-          "doctorStatus": "skipped_unresolved_clinic"
-        }
+        "surgeon_kim_taehyung",
+        "surgeon_kim_seoyeon"
       ]
     },
     {
-      "step": "validate",
-      "trigger": "fetch_doctors.clinics",
-      "tool": "validate agent",
+      "step": "associate_doctor",
+      "trigger": "page-banobagi",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "model": {
+          "doctor_id": null,
+          "quote": null,
+          "status": "unresolved"
+        },
+        "kept": [],
+        "doctorStatus": "unresolved",
+        "rejectReason": null
+      }
+    },
+    {
+      "step": "analyse",
+      "trigger": "page-id",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "procedures": [
+          "double_eyelid"
+        ],
+        "dropped": [
+          "쌍꺼풀 수술"
+        ],
+        "doctorMentions": [
+          "김민준 원장"
+        ]
+      }
+    },
+    {
+      "step": "translate",
+      "trigger": "page-id",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "summaryEn": "ID Hospital offers double eyelid surgery."
+      }
+    },
+    {
+      "step": "fetch_doctors",
+      "trigger": "page-id",
+      "tool": "doctor directory connector",
       "output": [
-        {
-          "id": "page-banobagi",
-          "status": "published",
-          "reasons": []
-        },
-        {
-          "id": "page-id",
-          "status": "published",
-          "reasons": []
-        },
-        {
-          "id": "page-unknown",
-          "status": "quarantined",
-          "reasons": [
-            "clinic_unresolved",
-            "procedure_unverified"
-          ]
-        }
+        "surgeon_kim_minjun"
       ]
+    },
+    {
+      "step": "associate_doctor",
+      "trigger": "page-id",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "model": {
+          "doctor_id": "surgeon_kim_minjun",
+          "quote": "김민준 원장이",
+          "status": "supported"
+        },
+        "kept": [
+          "Kim Min-jun"
+        ],
+        "doctorStatus": "supported",
+        "rejectReason": null
+      }
+    },
+    {
+      "step": "analyse",
+      "trigger": "page-unknown",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "procedures": [],
+        "dropped": [
+          "리프팅",
+          "피부관리"
+        ],
+        "doctorMentions": []
+      }
+    },
+    {
+      "step": "translate",
+      "trigger": "page-unknown",
+      "tool": "openai:gpt-4o-mini",
+      "output": {
+        "summaryEn": "We provide lifting and skin care services."
+      }
+    },
+    {
+      "step": "fetch_doctors",
+      "trigger": "page-unknown",
+      "tool": "skipped",
+      "output": {
+        "reason": "clinic_unresolved"
+      }
     },
     {
       "step": "publish",

@@ -1,40 +1,55 @@
 # Gangnam clinic pipeline
 
-Fixture-backed agent pipeline for Gangnam Beauty Guide.
+Three OpenAI agents sit between directory tools. The model extracts, translates, and proposes a doctor. Code publishes a doctor only when the quote contains that doctor's full Korean name.
 
-```text
-fetch clinics → analyse → translate Korean to English → fetch doctors → validate → publish
+```mermaid
+flowchart TD
+  cli([CLI]) --> fetchClinics[Fetch clinics<br/>directory tool]
+  fetchClinics --> analyse[Analyse agent<br/>OpenAI JSON]
+  analyse --> confirm[Alias and glossary tools<br/>keep only Korean spans that match]
+  confirm --> translate[Translate agent<br/>OpenAI JSON]
+  translate --> resolved{Clinic id resolved?}
+  resolved -->|no| hold[Skip doctor fetch]
+  resolved -->|yes| fetchDoctors[Fetch doctors<br/>directory tool by clinic id]
+  fetchDoctors --> associate[Associate agent<br/>OpenAI JSON plus a Korean quote]
+  associate --> validate[Validator<br/>quote must contain the full Korean name]
+  hold --> publish[Publish English clinic card]
+  validate --> publish
 ```
 
-English names are display fields. A doctor is attached only when their Korean name is on the clinic page and the clinic id already resolved. `supported` means an alias hit, not a license check.
+`supported` means the Korean span matched. It does not mean a license was checked.
 
 ## Run
 
 ```bash
+export OPENAI_API_KEY=...
 node src/run.js --broken
 node src/run.js
 node --test test/pipeline.test.js
 ```
 
+The default model is `gpt-4o-mini`. Override it with `OPENAI_MODEL`. Tests inject a scripted model so the quote gate can be checked without a network call. `src/run.js` calls OpenAI.
+
 ## Steps
 
-1. **Fetch clinics.** Directory connector returns three Korean clinic pages.
-2. **Analyse.** Matches the Korean clinic name to an alias table and reads procedure terms from the Korean body. `강남뷰티의원` matches nothing, so no doctor call is made.
-3. **Translate.** Writes the English clinic name and procedure labels from the analysis. It does not choose a doctor.
-4. **Fetch doctors.** Doctor connector runs only with a resolved clinic id. The associate step keeps a doctor whose Korean name appears in the source body.
-5. **Validate.** Procedure evidence must still be in the Korean body. A doctor whose Korean name is absent is not publishable.
-6. **Publish.** English clinic cards plus attached doctors.
+1. **Fetch clinics.** The directory connector returns three Korean pages. No model.
+2. **Analyse agent.** OpenAI copies procedure and doctor spans from the Korean body. The glossary drops any procedure the model named that is not actually in the text, so `리프팅` cannot become a canonical procedure.
+3. **Translate agent.** OpenAI writes the English summary from the canonical clinic name and the confirmed procedures.
+4. **Fetch doctors.** Runs only with a resolved clinic id. `강남뷰티의원` never gets this call.
+5. **Associate agent.** OpenAI may propose one roster doctor and must return a verbatim Korean quote.
+6. **Validate.** The quote has to sit inside the page and include the full Korean name. A surname quote is rejected and the English summary is rewritten without a doctor.
+7. **Publish.** English clinic cards, with a doctor only when the quote passed.
 
 ## Where it broke
 
-Banobagi's page says `김 원장님`, not a full name. The translator rendered that as "Dr. Kim". The doctor step treated the English surname as a match and took the first Banobagi row, Kim Tae-hyung. The validator only checked that the English hint appeared in the English summary.
+The first associate prompt told the model to pick the first roster doctor surnamed Kim when the page only contained `김`. It did, and the validator accepted the quote because `김` appears in `김 원장님`. Banobagi was published under Kim Tae-hyung, who is not named on that page. The translate prompt had also been told to write "Dr. Kim".
 
-The translator no longer emits a doctor. Association requires the full Korean name, so ID Hospital keeps 김민준 and Banobagi publishes with `doctorStatus: unresolved`. The unknown clinic stays quarantined.
+The associate prompt now requires `nameKo` in the quote, and the validator enforces the same rule. A model that still guesses is overwritten to `doctorStatus: unresolved`, and the English line is rewritten from the confirmed procedure and clinic. ID Hospital still attaches 김민준, because that name is on the page.
 
 ## Fixtures
 
 | page | Fixed result |
 | --- | --- |
-| 바노바기성형외과, rhinoplasty, surgeon written only as Director Kim | published clinic, no doctor |
-| 아이디병원, double eyelid, 김민준 | published clinic + Kim Min-jun |
-| 강남뷰티의원 | quarantined, doctors not fetched |
+| 바노바기성형외과, rhinoplasty, `김 원장님` | published clinic, doctor unresolved |
+| 아이디병원, double eyelid, `김민준` | published clinic and Kim Min-jun |
+| 강남뷰티의원 | quarantined, doctor agent not called |

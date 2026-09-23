@@ -1,32 +1,34 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { openaiJson } from "./openai.js";
 import { runPipeline } from "./pipeline.js";
 
-const brokenDoctorFromEnglish = process.argv.includes("--broken");
-const result = runPipeline({ brokenDoctorFromEnglish });
+const brokenDoctorPrompt = process.argv.includes("--broken");
+const result = await runPipeline({ brokenDoctorPrompt, llm: openaiJson });
 const output = {
-  mode: brokenDoctorFromEnglish ? "doctor_matched_from_english" : "doctor_matched_from_korean",
+  mode: brokenDoctorPrompt ? "llm_surname_prompt" : "llm_full_name_plus_quote_gate",
+  model: process.env.OPENAI_MODEL || "gpt-4o-mini",
   published: result.published,
   quarantined: result.quarantined,
   trace: result.trace,
 };
 
 mkdirSync("output", { recursive: true });
-const file = brokenDoctorFromEnglish ? "output/broken.json" : "output/fixed.json";
+const file = brokenDoctorPrompt ? "output/broken.json" : "output/fixed.json";
 writeFileSync(file, JSON.stringify(output, null, 2));
 
 console.log(JSON.stringify({
   mode: output.mode,
   published: result.published.map((card) => ({
     id: card.id,
-    clinic: card.clinic,
-    procedures: card.procedures,
-    doctors: card.doctors,
+    clinic: card.clinic.nameEn,
+    procedures: card.procedures.map((procedure) => procedure.id),
     summaryEn: card.english.summaryEn,
+    doctors: card.doctors,
+    doctorStatus: card.doctorStatus,
   })),
   quarantined: result.quarantined.map((card) => ({
     id: card.id,
     reasons: card.reasons,
-    doctors: card.doctors,
     doctorStatus: card.doctorStatus,
   })),
   wrote: file,

@@ -2,7 +2,7 @@
   "name": "gangnam-syndicate",
   "private": true,
   "type": "module",
-  "description": "Multi-step review syndication pipeline for the Gangnam Beauty Guide assessment.",
+  "description": "OpenAI agent pipeline that fetches Korean clinics, translates them, and attaches a doctor only when the Korean quote matches.",
   "scripts": {
     "start": "node src/run.js",
     "broken": "node src/run.js --broken",
